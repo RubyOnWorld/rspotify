@@ -77,21 +77,7 @@
 //!     EpisodeId::from_id("4zugY5eJisugQj9rj8TYuh").unwrap(),
 //! ];
 //!
-//! // First we get some info about the tracks and episodes
-//! let track_info = tracks.iter().map(|id| track(id.as_ref())).collect::<Vec<_>>();
-//! let ep_info = episodes.iter().map(|id| episode(id.as_ref())).collect::<Vec<_>>();
-//! println!("Track info: {:?}", track_info);
-//! println!("Episode info: {:?}", ep_info);
-//!
-//! // And then we add both the tracks and episodes to the queue
-//! let playable = tracks
-//!     .into_iter()
-//!     .map(|t| t.as_ref().into())
-//!     .chain(
-//!         episodes.into_iter().map(|e| e.as_ref().into())
-//!     )
-//!     .collect::<Vec<PlayableId>>();
-//! add_to_queue(&playable);
+
 //! ```
 
 use enum_dispatch::enum_dispatch;
@@ -517,6 +503,30 @@ impl<'a> PlayContextId<'a> {
         }
     }
 }
+
+// Spotify ID or URI parsing error
+///
+/// See also [`Id`](crate::idtypes::Id) for details.
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Display, Error)]
+pub enum IdError {
+    /// Spotify URI prefix is not `spotify:` or `spotify/`.
+    InvalidPrefix,
+    /// Spotify URI can't be split into type and id parts (e.g., it has invalid
+    /// separator).
+    InvalidFormat,
+    /// Spotify URI has invalid type name, or id has invalid type in a given
+    /// context (e.g. a method expects a track id, but artist id is provided).
+    InvalidType,
+    /// Spotify id is invalid (empty or contains invalid characters).
+    InvalidId,
+}
+
+/// The main interface for an ID.
+///
+/// See the [module level documentation] for more information.
+///
+/// [module level documentation]: [`crate::idtypes`]
+#[enum_dispatch]
 
 /// Grouping up multiple kinds of IDs to treat them generically. This also
 /// implements [`Id`] and [`From`] to instantiate it.
